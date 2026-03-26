@@ -100,6 +100,7 @@
     <button class="exp-btn" id="expBtn">📋 顯示文字摘要（全選後可複製）</button>
     <div class="exp-box" id="expBox"></div>
     <div class="exp-hint" id="expHint">長按或 Ctrl+A 全選後複製，貼給老師或存在筆記</div>
+    <button class="exp-btn" id="csvBtn" style="margin-top:8px">⬇️ 下載全部記錄（CSV）</button>
   </div>
 </div>
 
@@ -360,6 +361,37 @@
     const hh=Math.floor(sm/60),mm2=sm%60;
     lines.push('統計：餵食 '+fc+' 次 ｜ 睡眠 '+(sm===0?'0h':(hh>0?hh+'h'+(mm2>0?' '+mm2+'m':''):(mm2+'m')))+' ｜ 排尿 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排尿'||r.diaperType==='兩者')).length+' 次 ｜ 排便 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排便'||r.diaperType==='兩者')).length+' 次');
     box.textContent=lines.join('\n');box.style.display='block';hint.style.display='block';
+  });
+
+
+  // CSV DOWNLOAD
+  document.getElementById('csvBtn').addEventListener('click',function(){
+    const allDates=Object.keys(db).sort();
+    if(!allDates.length){alert('目前沒有任何記錄');return}
+    const rows=['日期,時間,類型,細項,數值,單位,備註'];
+    allDates.forEach(date=>{
+      (db[date]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{
+        function esc(s){return '"'+(String(s||'').replace(/"/g,'""'))+'"'}
+        if(r.type==='feed'){
+          const val=r.feedType==='母乳'?r.duration:r.amount;
+          const unit=r.feedType==='母乳'?'分鐘':r.unit;
+          rows.push([date,r.time,'餵食',esc(r.feedType),val||'',unit||'',esc(r.note||'')].join(','));
+        } else if(r.type==='sleep'){
+          const dur=r.durMin||0;
+          const note=(r.overnight?'跨日 ':'')+(r.note||'');
+          rows.push([date,r.sleepStart,'睡眠',esc(r.sleepType||''),dur,'分鐘',esc(note)].join(','));
+        } else {
+          rows.push([date,r.time,'尿布',esc(r.diaperType),'','',esc(r.note||'')].join(','));
+        }
+      });
+    });
+    const bom='\uFEFF';
+    const blob=new Blob([bom+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='寶寶記錄_'+(new Date().toISOString().slice(0,10))+'.csv';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
   });
 
   refreshDate();
