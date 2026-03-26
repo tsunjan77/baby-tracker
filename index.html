@@ -487,8 +487,9 @@
       const lastFeedMin=toMin(lastFeed.time);
       const gap=ssMin-lastFeedMin;
       if(gap<20) return;
-      if(usedSleepIds.has(s.id)) return;
-      usedSleepIds.add(s.id);
+      const sleepKey=s.id||s.sleepStart;
+      if(usedSleepIds.has(sleepKey)) return;
+      usedSleepIds.add(sleepKey);
       const seMin=toMin(s.sleepEnd);
       const totalMin=seMin>ssMin?seMin-lastFeedMin:(1440-lastFeedMin+seMin);
       cycles.push({feedMin:lastFeedMin,sleepStartMin:ssMin,sleepEndMin:seMin,gapMin:gap,totalMin});
