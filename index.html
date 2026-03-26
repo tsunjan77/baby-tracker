@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -455,21 +454,17 @@
     }
     if(wakeMin===null) return null;
 
-    // find night start: first sleep after 18:00 where wake gap <20min
+    // find night start: first overnight sleep (crosses midnight)
+    // if no overnight sleep found, fall back to first sleep after 22:00
     let nightStartMin=null;
-    for(let i=0;i<sleeps.length;i++){
-      const slpStartMin=toMin(sleeps[i].sleepStart);
-      if(slpStartMin<1080) continue; // before 18:00 skip
-      // check if feed before this sleep within 20min
-      const precedingFeeds=feeds.filter(f=>toMin(f.time)<slpStartMin&&toMin(f.time)>slpStartMin-30);
-      if(precedingFeeds.length){
-        const gap=slpStartMin-toMin(precedingFeeds[precedingFeeds.length-1].time);
-        if(gap<20){nightStartMin=slpStartMin;break}
-      } else {
-        nightStartMin=slpStartMin;break;
-      }
+    const overnightSleep=sleeps.find(s=>s.overnight);
+    if(overnightSleep){
+      nightStartMin=toMin(overnightSleep.sleepStart);
+    } else {
+      const lateSleep=sleeps.find(s=>toMin(s.sleepStart)>=1320);
+      if(lateSleep) nightStartMin=toMin(lateSleep.sleepStart);
+      else nightStartMin=1320;
     }
-    if(nightStartMin===null) nightStartMin=1320; // default 10pm
 
     // find valid cycles: for each daytime sleep, find the last feed before it
     // gap between last feed and sleep start must be >= 20min
@@ -477,7 +472,7 @@
     const usedSleepIds=new Set();
     sleeps.forEach(s=>{
       const ssMin=toMin(s.sleepStart);
-      if(ssMin<wakeMin||ssMin>=nightStartMin) return;
+      if(ssMin<wakeMin||ssMin>nightStartMin) return;
       const precedingFeeds=feeds.filter(f=>{
         const fMin=toMin(f.time);
         return fMin<ssMin && fMin>=wakeMin && fMin<nightStartMin;
