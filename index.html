@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -171,7 +172,10 @@
 
 <script>
 (function(){
-  const db={};
+  const STORE_KEY='sunnyBabyTracker_v1';
+  function loadDb(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')}catch{return{}}}
+  function saveDb(){try{localStorage.setItem(STORE_KEY,JSON.stringify(db))}catch(e){console.warn('localStorage unavailable',e)}}
+  const db=loadDb();
   let curDate=today(),editId=null,fUnit='oz',fType=null,slpType=null,dpType=null;
 
   function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -271,10 +275,10 @@
     if(!db[curDate])db[curDate]=[];
     const idx=db[curDate].findIndex(r=>r.id===rec.id);
     if(idx>=0)db[curDate][idx]=rec;else db[curDate].push(rec);
-    render();hideExport();
+    saveDb();render();hideExport();
   }
   function delRec(id){
-    if(!db[curDate])return;db[curDate]=db[curDate].filter(r=>r.id!==id);render();hideExport();
+    if(!db[curDate])return;db[curDate]=db[curDate].filter(r=>r.id!==id);saveDb();render();hideExport();
   }
   function editRec(id){
     const rec=(db[curDate]||[]).find(r=>r.id===id);if(!rec)return;editId=id;
