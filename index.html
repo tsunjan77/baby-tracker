@@ -471,24 +471,28 @@
     }
     if(nightStartMin===null) nightStartMin=1320; // default 10pm
 
-    // find valid cycles: feed -> gap>=20min -> sleep (no other feed in between)
+    // find valid cycles: for each daytime sleep, find the last feed before it
+    // gap between last feed and sleep start must be >= 20min
     const cycles=[];
-    for(let fi=0;fi<feeds.length;fi++){
-      const fMin=toMin(feeds[fi].time);
-      if(fMin<wakeMin||fMin>=nightStartMin) continue;
-      // find next feed
-      const nextFeedMin=fi+1<feeds.length?toMin(feeds[fi+1].time):nightStartMin+999;
-      // find sleep that starts after this feed and before next feed
-      const matchSleep=sleeps.find(s=>{
-        const ssMin=toMin(s.sleepStart);
-        return ssMin>fMin && ssMin<nextFeedMin && ssMin>=wakeMin && ssMin<nightStartMin;
+    const usedSleepIds=new Set();
+    sleeps.forEach(s=>{
+      const ssMin=toMin(s.sleepStart);
+      if(ssMin<wakeMin||ssMin>=nightStartMin) return;
+      const precedingFeeds=feeds.filter(f=>{
+        const fMin=toMin(f.time);
+        return fMin<ssMin && fMin>=wakeMin && fMin<nightStartMin;
       });
-      if(!matchSleep) continue;
-      const ssMin=toMin(matchSleep.sleepStart);
-      const gap=ssMin-fMin;
-      if(gap<20) continue; // no護 gap
-      cycles.push({feedMin:fMin,sleepStartMin:ssMin,sleepEndMin:toMin(matchSleep.sleepEnd),gapMin:gap,totalMin:toMin(matchSleep.sleepEnd)-fMin});
-    }
+      if(!precedingFeeds.length) return;
+      const lastFeed=precedingFeeds[precedingFeeds.length-1];
+      const lastFeedMin=toMin(lastFeed.time);
+      const gap=ssMin-lastFeedMin;
+      if(gap<20) return;
+      if(usedSleepIds.has(s.id)) return;
+      usedSleepIds.add(s.id);
+      const seMin=toMin(s.sleepEnd);
+      const totalMin=seMin>ssMin?seMin-lastFeedMin:(1440-lastFeedMin+seMin);
+      cycles.push({feedMin:lastFeedMin,sleepStartMin:ssMin,sleepEndMin:seMin,gapMin:gap,totalMin});
+    });
 
     return{wakeMin,nightStartMin,feeds,sleeps,cycles};
   }
@@ -632,3 +636,4 @@
 </script>
 </body>
 </html>
+
