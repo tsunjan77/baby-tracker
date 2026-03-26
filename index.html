@@ -8,7 +8,7 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,'Noto Sans TC',sans-serif;background:#faf7f2;color:#2d2d2d;font-size:15px;min-height:100vh}
-  .app{max-width:520px;margin:0 auto;padding:0 0 48px}
+  .app{max-width:520px;margin:0 auto;padding:0 0 70px}
   .hdr{background:#fff9f4;border-bottom:1.5px solid #e8e2d9;padding:14px 16px 10px;position:sticky;top:0;z-index:50}
   .hdr-title{font-size:15px;font-weight:600;color:#2d2d2d}
   .hdr-title span{color:#6b9e6b}
@@ -18,7 +18,11 @@
   .ddisp{flex:1;text-align:center;font-size:13px;font-weight:500;color:#2d2d2d}
   .today-btn{font-size:12px;padding:3px 10px;border:1.5px solid #6b9e6b;border-radius:20px;background:transparent;color:#6b9e6b;cursor:pointer}
   .today-btn:hover{background:#edf4ed}
-  .body{padding:12px 16px}
+  .tab-bar{display:flex;background:#fff9f4;border-bottom:1.5px solid #e8e2d9;position:sticky;top:74px;z-index:40}
+  .tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:500;color:#b0aba4;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+  .tab.on{color:#6b9e6b;border-bottom-color:#6b9e6b}
+  .page{display:none;padding:12px 16px}
+  .page.on{display:block}
   .add-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
   .add-btn{padding:10px 4px;border-radius:12px;border:1.5px solid #e8e2d9;background:#f5f2ed;cursor:pointer;font-size:12px;font-weight:500;color:#6b6b6b;display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .15s,color .15s;font-family:inherit}
   .add-btn:hover{border-color:#6b9e6b;color:#6b9e6b}
@@ -42,10 +46,32 @@
   .stat{background:#f5f2ed;border-radius:10px;padding:12px}
   .stat-val{font-size:22px;font-weight:500;color:#2d2d2d}
   .stat-lbl{font-size:11px;color:#6b6b6b;margin-top:2px;letter-spacing:.04em}
-  .exp-btn{margin-top:16px;width:100%;padding:11px;border-radius:10px;border:1.5px solid #e8e2d9;background:#f5f2ed;cursor:pointer;font-size:13px;color:#6b6b6b;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
+  .exp-btn{margin-top:12px;width:100%;padding:11px;border-radius:10px;border:1.5px solid #e8e2d9;background:#f5f2ed;cursor:pointer;font-size:13px;color:#6b6b6b;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
   .exp-btn:hover{border-color:#6b9e6b;color:#6b9e6b}
-  .exp-box{display:none;margin-top:10px;background:#f5f2ed;border:1.5px solid #e8e2d9;border-radius:10px;padding:12px;font-size:12px;color:#2d2d2d;font-family:'Courier New',Courier,monospace;white-space:pre-wrap;line-height:1.7;max-height:300px;overflow-y:auto;user-select:all;-webkit-user-select:all}
+  .exp-box{display:none;margin-top:10px;background:#f5f2ed;border:1.5px solid #e8e2d9;border-radius:10px;padding:12px;font-size:12px;color:#2d2d2d;font-family:'Courier New',Courier,monospace;white-space:pre-wrap;line-height:1.7;max-height:260px;overflow-y:auto;user-select:all;-webkit-user-select:all}
   .exp-hint{font-size:11px;color:#b0aba4;text-align:center;margin-top:6px;font-style:italic;display:none}
+  /* ANALYSIS */
+  .analysis-empty{text-align:center;padding:40px 20px;font-size:13px;color:#b0aba4;line-height:1.8}
+  .legend-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+  .leg{display:flex;align-items:center;gap:5px;font-size:11px;color:#6b6b6b}
+  .leg-box{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+  .chart-wrap{margin-bottom:4px}
+  .axis-row{display:flex;margin-left:36px;margin-bottom:2px}
+  .axis-tick{flex:1;font-size:9px;color:#b0aba4;text-align:left}
+  .day-row-c{display:flex;align-items:center;margin-bottom:8px;gap:6px}
+  .day-lbl{font-size:11px;font-weight:500;color:#6b6b6b;width:30px;flex-shrink:0;text-align:right}
+  .tl{position:relative;flex:1;height:26px;background:#f0ece5;border-radius:4px;overflow:visible}
+  .tl-bar{position:absolute;top:3px;bottom:3px;border-radius:3px}
+  .tl-night{position:absolute;top:0;bottom:0;background:#d8d3cb;border-radius:0}
+  .tl-feed{position:absolute;top:50%;transform:translate(-50%,-50%);width:7px;height:7px;border-radius:50%;background:#c0522a;border:1.5px solid #fff;z-index:3}
+  .tl-cycle{position:absolute;top:-1px;bottom:-1px;border:1.5px solid #1D9E75;border-radius:3px;background:rgba(29,158,117,.08);z-index:1}
+  .tl-dur{position:absolute;top:-16px;font-size:9px;color:#0F6E56;font-weight:500;white-space:nowrap;transform:translateX(-50%);z-index:4}
+  .info-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+  .info-card{background:#f5f2ed;border-radius:10px;padding:11px 12px}
+  .info-card-lbl{font-size:10px;color:#b0aba4;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+  .info-card-val{font-size:16px;font-weight:500;color:#2d2d2d}
+  .info-card-sub{font-size:11px;color:#6b6b6b;margin-top:2px}
+  /* MODAL */
   .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center}
   .overlay.open{display:flex}
   .modal{background:#fff9f4;border-radius:18px 18px 0 0;padding:20px 16px 28px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto}
@@ -55,6 +81,7 @@
   .edit-banner.show{display:block}
   .field{margin-bottom:12px}
   .field label{display:block;font-size:11px;font-weight:500;color:#6b6b6b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .req{color:#c0522a}
   .field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1.5px solid #e8e2d9;border-radius:8px;background:#faf7f2;font-size:14px;color:#2d2d2d;outline:none;-webkit-appearance:none;font-family:inherit}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:#6b9e6b}
   .field textarea{resize:vertical;min-height:56px}
@@ -76,14 +103,21 @@
 <div class="app">
   <div class="hdr">
     <div class="hdr-title"><span>Sunny</span> Parent · 寶寶每日記錄</div>
-    <div class="date-row">
+    <div class="date-row" id="dateRowWrap">
       <button class="darr" id="prev">‹</button>
       <div class="ddisp" id="ddisp"></div>
       <button class="darr" id="nxt">›</button>
       <button class="today-btn" id="todayBtn">今天</button>
     </div>
   </div>
-  <div class="body">
+
+  <div class="tab-bar">
+    <div class="tab on" id="tabLog">📋 每日記錄</div>
+    <div class="tab" id="tabAnalysis">📊 睡眠分析</div>
+  </div>
+
+  <!-- PAGE: LOG -->
+  <div class="page on" id="pageLog">
     <div class="add-row">
       <button class="add-btn" id="btnFeed"><span class="ico">🍼</span>餵食</button>
       <button class="add-btn" id="btnSleep"><span class="ico">🌙</span>睡眠</button>
@@ -99,8 +133,13 @@
     </div>
     <button class="exp-btn" id="expBtn">📋 顯示文字摘要（全選後可複製）</button>
     <div class="exp-box" id="expBox"></div>
-    <div class="exp-hint" id="expHint">長按或 Ctrl+A 全選後複製，貼給老師或存在筆記</div>
+    <div class="exp-hint" id="expHint">長按或 Ctrl+A 全選後複製</div>
     <button class="exp-btn" id="csvBtn" style="margin-top:8px">⬇️ 下載全部記錄（CSV）</button>
+  </div>
+
+  <!-- PAGE: ANALYSIS -->
+  <div class="page" id="pageAnalysis">
+    <div id="analysisContent"></div>
   </div>
 </div>
 
@@ -110,8 +149,8 @@
     <div class="mhandle"></div>
     <div class="mtitle">🍼 餵食記錄</div>
     <div class="edit-banner" id="fedBanner">✏️ 編輯模式</div>
-    <div class="field"><label>時間</label><input type="time" id="fTime"></div>
-    <div class="field"><label>餵食方式</label>
+    <div class="field"><label>時間 <span class="req">*</span></label><input type="time" id="fTime"></div>
+    <div class="field"><label>餵食方式 <span class="req">*</span></label>
       <div class="tog-grp" id="fTypeGrp">
         <div class="tog" data-v="母乳">母乳</div>
         <div class="tog" data-v="瓶餵母乳">瓶餵母乳</div>
@@ -135,8 +174,8 @@
     <div class="mtitle">🌙 睡眠記錄</div>
     <div class="edit-banner" id="slpBanner">✏️ 編輯模式</div>
     <div class="frow">
-      <div class="field"><label>開始時間</label><input type="time" id="slpS"></div>
-      <div class="field"><label>結束時間</label><input type="time" id="slpE"></div>
+      <div class="field"><label>開始時間 <span class="req">*</span></label><input type="time" id="slpS"></div>
+      <div class="field"><label>結束時間 <span class="req">*</span></label><input type="time" id="slpE"></div>
     </div>
     <div class="field"><label>入睡方式</label>
       <div class="tog-grp" id="slpTypeGrp">
@@ -158,8 +197,8 @@
     <div class="mhandle"></div>
     <div class="mtitle">💧 尿布記錄</div>
     <div class="edit-banner" id="dpBanner">✏️ 編輯模式</div>
-    <div class="field"><label>時間</label><input type="time" id="dpTime"></div>
-    <div class="field"><label>類型</label>
+    <div class="field"><label>時間 <span class="req">*</span></label><input type="time" id="dpTime"></div>
+    <div class="field"><label>類型 <span class="req">*</span></label>
       <div class="tog-grp" id="dpTypeGrp">
         <div class="tog" data-v="排尿">💧 排尿</div>
         <div class="tog" data-v="排便">💩 排便</div>
@@ -173,16 +212,18 @@
 
 <script>
 (function(){
-  const STORE_KEY='sunnyBabyTracker_v1';
+  const STORE_KEY='sunnyBabyTracker_v2';
   function loadDb(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}')}catch{return{}}}
-  function saveDb(){try{localStorage.setItem(STORE_KEY,JSON.stringify(db))}catch(e){console.warn('localStorage unavailable',e)}}
+  function saveDb(){try{localStorage.setItem(STORE_KEY,JSON.stringify(db))}catch(e){console.warn('storage err',e)}}
   const db=loadDb();
   let curDate=today(),editId=null,fUnit='oz',fType=null,slpType=null,dpType=null;
+  let curTab='log';
 
   function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
   function pad(n){return String(n).padStart(2,'0')}
   function nowTime(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
   function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+  function toMin(t){const[h,m]=t.split(':').map(Number);return h*60+m}
   function dayRecs(){return(db[curDate]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time))}
 
   function fmtDate(s){
@@ -195,6 +236,19 @@
   document.getElementById('prev').addEventListener('click',()=>shiftDate(-1));
   document.getElementById('nxt').addEventListener('click',()=>shiftDate(1));
   document.getElementById('todayBtn').addEventListener('click',()=>{curDate=today();refreshDate()});
+
+  // TABS
+  document.getElementById('tabLog').addEventListener('click',()=>switchTab('log'));
+  document.getElementById('tabAnalysis').addEventListener('click',()=>switchTab('analysis'));
+  function switchTab(t){
+    curTab=t;
+    document.getElementById('tabLog').classList.toggle('on',t==='log');
+    document.getElementById('tabAnalysis').classList.toggle('on',t==='analysis');
+    document.getElementById('pageLog').classList.toggle('on',t==='log');
+    document.getElementById('pageAnalysis').classList.toggle('on',t==='analysis');
+    document.getElementById('dateRowWrap').style.display=t==='log'?'':'none';
+    if(t==='analysis')renderAnalysis();
+  }
 
   function openM(id){document.getElementById(id).classList.add('open')}
   function closeM(id){document.getElementById(id).classList.remove('open')}
@@ -221,11 +275,7 @@
     document.getElementById('fedBanner').classList.remove('show');
     fUnit='oz';document.getElementById('uOz').classList.add('on');document.getElementById('uMl').classList.remove('on');
   }
-  bindTog('fTypeGrp',v=>{
-    fType=v;const b=v==='母乳';
-    document.getElementById('fDurFld').style.display=b?'':'none';
-    document.getElementById('fAmtFld').style.display=b?'none':'';
-  });
+  bindTog('fTypeGrp',v=>{fType=v;const b=v==='母乳';document.getElementById('fDurFld').style.display=b?'':'none';document.getElementById('fAmtFld').style.display=b?'none':'';});
   document.getElementById('uOz').addEventListener('click',()=>{fUnit='oz';document.getElementById('uOz').classList.add('on');document.getElementById('uMl').classList.remove('on')});
   document.getElementById('uMl').addEventListener('click',()=>{fUnit='ml';document.getElementById('uMl').classList.add('on');document.getElementById('uOz').classList.remove('on')});
   document.getElementById('btnFeed').addEventListener('click',()=>{resetFeed();editId=null;openM('mFeed')});
@@ -250,10 +300,14 @@
   document.getElementById('btnSleep').addEventListener('click',()=>{resetSleep();editId=null;openM('mSleep')});
   document.getElementById('slpCx').addEventListener('click',()=>closeM('mSleep'));
   document.getElementById('slpSv').addEventListener('click',()=>{
-    const s=document.getElementById('slpS').value;if(!s){alert('請填入開始時間');return}
-    const e=document.getElementById('slpE').value,custom=document.getElementById('slpCustom').value.trim();
-    const sType=custom||slpType||'';let overnight=false,durMin=0;
-    if(e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number);const sM=sh*60+sm,eM=eh*60+em;overnight=eM<sM;durMin=overnight?(1440-sM+eM):(eM-sM)}
+    const s=document.getElementById('slpS').value,e=document.getElementById('slpE').value;
+    if(!s){alert('請填入開始時間');return}
+    if(!e){alert('請填入結束時間（起床時間）');return}
+    const custom=document.getElementById('slpCustom').value.trim();
+    const sType=custom||slpType||'';
+    const sM=toMin(s),eM=toMin(e);
+    const overnight=eM<sM;
+    const durMin=overnight?(1440-sM+eM):(eM-sM);
     saveRec({id:editId||uid(),type:'sleep',time:s,sleepStart:s,sleepEnd:e,sleepType:sType,overnight,durMin,note:document.getElementById('slpNote').value.trim()});
     closeM('mSleep');
   });
@@ -348,23 +402,21 @@
     const box=document.getElementById('expBox'),hint=document.getElementById('expHint');
     if(box.style.display==='block'){hideExport();return}
     const recs=dayRecs(),[y,m,d]=curDate.split('-');
-    const lines=['📋 Sunny Parent 寶寶記錄 ─ '+y+'/'+m+'/'+d,'─'.repeat(30)];
+    const lines=['Sunny Parent 寶寶記錄 - '+y+'/'+m+'/'+d,'─'.repeat(28)];
     if(!recs.length){lines.push('（今日無記錄）')}
     else recs.forEach(r=>{
-      if(r.type==='feed'){let l='🍼 '+r.time+'  餵食 / '+r.feedType;if(r.feedType==='母乳'&&r.duration)l+='  '+r.duration+'分鐘';else if(r.amount)l+='  '+r.amount+r.unit;if(r.note)l+='  備註：'+r.note;lines.push(l)}
-      else if(r.type==='sleep'){const h=Math.floor((r.durMin||0)/60),mn=(r.durMin||0)%60;let l='🌙 '+r.sleepStart+(r.sleepEnd?' → '+r.sleepEnd+'（'+(h>0?h+'h ':'')+mn+'m）':'');if(r.overnight)l+='【跨日】';if(r.sleepType)l+='  '+r.sleepType;if(r.note)l+='  備註：'+r.note;lines.push(l)}
-      else{let l='💧 '+r.time+'  尿布 / '+r.diaperType;if(r.note)l+='  備註：'+r.note;lines.push(l)}
+      if(r.type==='feed'){let l='🍼 '+r.time+'  '+r.feedType;if(r.feedType==='母乳'&&r.duration)l+='  '+r.duration+'分鐘';else if(r.amount)l+='  '+r.amount+r.unit;if(r.note)l+='  '+r.note;lines.push(l)}
+      else if(r.type==='sleep'){const h=Math.floor((r.durMin||0)/60),mn=(r.durMin||0)%60;let l='🌙 '+r.sleepStart+(r.sleepEnd?' → '+r.sleepEnd+'（'+(h>0?h+'h ':'')+mn+'m）':'');if(r.overnight)l+='【跨日】';if(r.sleepType)l+='  '+r.sleepType;if(r.note)l+='  '+r.note;lines.push(l)}
+      else{let l='💧 '+r.time+'  '+r.diaperType;if(r.note)l+='  '+r.note;lines.push(l)}
     });
-    lines.push('─'.repeat(30));
+    lines.push('─'.repeat(28));
     const rs=db[curDate]||[],fc=rs.filter(r=>r.type==='feed').length;
     let sm=0;rs.filter(r=>r.type==='sleep').forEach(r=>sm+=r.durMin||0);
     const hh=Math.floor(sm/60),mm2=sm%60;
-    lines.push('統計：餵食 '+fc+' 次 ｜ 睡眠 '+(sm===0?'0h':(hh>0?hh+'h'+(mm2>0?' '+mm2+'m':''):(mm2+'m')))+' ｜ 排尿 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排尿'||r.diaperType==='兩者')).length+' 次 ｜ 排便 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排便'||r.diaperType==='兩者')).length+' 次');
+    lines.push('餵食 '+fc+' 次 | 睡眠 '+(sm===0?'0h':(hh>0?hh+'h'+(mm2>0?' '+mm2+'m':''):(mm2+'m')))+' | 排尿 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排尿'||r.diaperType==='兩者')).length+' | 排便 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排便'||r.diaperType==='兩者')).length);
     box.textContent=lines.join('\n');box.style.display='block';hint.style.display='block';
   });
 
-
-  // CSV DOWNLOAD
   document.getElementById('csvBtn').addEventListener('click',function(){
     const allDates=Object.keys(db).sort();
     if(!allDates.length){alert('目前沒有任何記錄');return}
@@ -372,31 +424,211 @@
     allDates.forEach(date=>{
       (db[date]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time)).forEach(r=>{
         function esc(s){return '"'+(String(s||'').replace(/"/g,'""'))+'"'}
-        if(r.type==='feed'){
-          const val=r.feedType==='母乳'?r.duration:r.amount;
-          const unit=r.feedType==='母乳'?'分鐘':r.unit;
-          rows.push([date,r.time,'餵食',esc(r.feedType),val||'',unit||'',esc(r.note||'')].join(','));
-        } else if(r.type==='sleep'){
-          const dur=r.durMin||0;
-          const note=(r.overnight?'跨日 ':'')+(r.note||'');
-          rows.push([date,r.sleepStart,'睡眠',esc(r.sleepType||''),dur,'分鐘',esc(note)].join(','));
-        } else {
-          rows.push([date,r.time,'尿布',esc(r.diaperType),'','',esc(r.note||'')].join(','));
-        }
+        if(r.type==='feed'){rows.push([date,r.time,'餵食',esc(r.feedType),r.feedType==='母乳'?r.duration||'':r.amount||'',r.feedType==='母乳'?'分鐘':r.unit||'',esc(r.note||'')].join(','))}
+        else if(r.type==='sleep'){rows.push([date,r.sleepStart,'睡眠',esc(r.sleepType||''),r.durMin||0,'分鐘',esc((r.overnight?'跨日 ':'')+(r.note||''))].join(','))}
+        else{rows.push([date,r.time,'尿布',esc(r.diaperType),'','',esc(r.note||'')].join(','))}
       });
     });
-    const bom='\uFEFF';
-    const blob=new Blob([bom+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
+    const blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8;'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;a.download='寶寶記錄_'+(new Date().toISOString().slice(0,10))+'.csv';
-    document.body.appendChild(a);a.click();
-    document.body.removeChild(a);URL.revokeObjectURL(url);
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
   });
+
+  // ── ANALYSIS ──
+  function analyzeDay(date){
+    const recs=(db[date]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time));
+    const feeds=recs.filter(r=>r.type==='feed');
+    const sleeps=recs.filter(r=>r.type==='sleep'&&r.sleepEnd);
+
+    // find wake time: end of last sleep that ended before 10am, or earliest sleep end overall
+    let wakeMin=null;
+    const morningSleeps=sleeps.filter(s=>toMin(s.sleepEnd)<=600);
+    if(morningSleeps.length){
+      wakeMin=Math.max(...morningSleeps.map(s=>toMin(s.sleepEnd)));
+    } else if(sleeps.length){
+      // find longest night sleep (durMin > 60) ending earliest
+      const longSleeps=sleeps.filter(s=>(s.durMin||0)>60);
+      if(longSleeps.length) wakeMin=Math.min(...longSleeps.map(s=>toMin(s.sleepEnd)));
+      else wakeMin=toMin(sleeps[0].sleepEnd);
+    }
+    if(wakeMin===null) return null;
+
+    // find night start: first sleep after 18:00 where wake gap <20min
+    let nightStartMin=null;
+    for(let i=0;i<sleeps.length;i++){
+      const slpStartMin=toMin(sleeps[i].sleepStart);
+      if(slpStartMin<1080) continue; // before 18:00 skip
+      // check if feed before this sleep within 20min
+      const precedingFeeds=feeds.filter(f=>toMin(f.time)<slpStartMin&&toMin(f.time)>slpStartMin-30);
+      if(precedingFeeds.length){
+        const gap=slpStartMin-toMin(precedingFeeds[precedingFeeds.length-1].time);
+        if(gap<20){nightStartMin=slpStartMin;break}
+      } else {
+        nightStartMin=slpStartMin;break;
+      }
+    }
+    if(nightStartMin===null) nightStartMin=1320; // default 10pm
+
+    // find valid cycles: feed -> gap>=20min -> sleep (no other feed in between)
+    const cycles=[];
+    for(let fi=0;fi<feeds.length;fi++){
+      const fMin=toMin(feeds[fi].time);
+      if(fMin<wakeMin||fMin>=nightStartMin) continue;
+      // find next feed
+      const nextFeedMin=fi+1<feeds.length?toMin(feeds[fi+1].time):nightStartMin+999;
+      // find sleep that starts after this feed and before next feed
+      const matchSleep=sleeps.find(s=>{
+        const ssMin=toMin(s.sleepStart);
+        return ssMin>fMin && ssMin<nextFeedMin && ssMin>=wakeMin && ssMin<nightStartMin;
+      });
+      if(!matchSleep) continue;
+      const ssMin=toMin(matchSleep.sleepStart);
+      const gap=ssMin-fMin;
+      if(gap<20) continue; // no護 gap
+      cycles.push({feedMin:fMin,sleepStartMin:ssMin,sleepEndMin:toMin(matchSleep.sleepEnd),gapMin:gap,totalMin:toMin(matchSleep.sleepEnd)-fMin});
+    }
+
+    return{wakeMin,nightStartMin,feeds,sleeps,cycles};
+  }
+
+  function renderAnalysis(){
+    const container=document.getElementById('analysisContent');
+    while(container.firstChild)container.removeChild(container.firstChild);
+
+    const allDates=Object.keys(db).sort().filter(d=>(db[d]||[]).some(r=>r.type==='sleep'&&r.sleepEnd));
+    if(!allDates.length){
+      const em=document.createElement('div');em.className='analysis-empty';
+      em.innerHTML='記錄至少一天的資料後，<br>這裡會自動產生睡眠分析圖。<br><br>記得填寫睡眠的<strong>結束時間</strong>！';
+      container.appendChild(em);return;
+    }
+
+    const recentDates=allDates.slice(-5);
+    const dayData=recentDates.map(d=>({date:d,analysis:analyzeDay(d)})).filter(d=>d.analysis);
+    if(!dayData.length){const em=document.createElement('div');em.className='analysis-empty';em.textContent='資料不足，請確認睡眠記錄包含結束時間。';container.appendChild(em);return}
+
+    // determine global window: earliest wake to latest night+buffer, anchored to earliest wake
+    const wakes=dayData.map(d=>d.analysis.wakeMin);
+    const globalStart=Math.min(...wakes);
+    const WINDOW=24*60;
+
+    function pct(absMin){
+      let rel=absMin-globalStart;
+      if(rel<0)rel+=1440;
+      return Math.min(100,Math.max(0,(rel/WINDOW*100)));
+    }
+    function pctW(startMin,endMin){
+      let dur=endMin-startMin;
+      if(dur<0)dur+=1440;
+      return Math.min(100,(dur/WINDOW*100));
+    }
+
+    // legend
+    const legRow=document.createElement('div');legRow.className='legend-row';
+    [{color:'#b8c9e0',label:'夜間'},{color:'#5DCAA5',label:'睡眠'},{color:'#1D9E75',label:'有效循環'},{color:'#c0522a',label:'餵食',round:true}].forEach(l=>{
+      const item=document.createElement('div');item.className='leg';
+      const box=document.createElement('div');box.className='leg-box';
+      box.style.background=l.color;if(l.round)box.style.borderRadius='50%';
+      item.appendChild(box);
+      const txt=document.createTextNode(l.label);item.appendChild(txt);
+      legRow.appendChild(item);
+    });
+    container.appendChild(legRow);
+
+    // axis labels
+    const axRow=document.createElement('div');axRow.className='axis-row';
+    const startH=Math.floor(globalStart/60);
+    for(let i=0;i<=8;i++){
+      const h=(startH+i*3)%24;
+      const tick=document.createElement('div');tick.className='axis-tick';
+      tick.textContent=h===0?'12am':h<12?h+'am':h===12?'12pm':(h-12)+'pm';
+      if(i===8)tick.style.textAlign='right';
+      axRow.appendChild(tick);
+    }
+    container.appendChild(axRow);
+
+    // chart
+    const chartWrap=document.createElement('div');chartWrap.className='chart-wrap';
+    dayData.forEach(({date,analysis})=>{
+      const{wakeMin,nightStartMin,feeds,sleeps,cycles}=analysis;
+      const[,m,d]=date.split('-');
+      const row=document.createElement('div');row.className='day-row-c';
+      const lbl=document.createElement('div');lbl.className='day-lbl';lbl.textContent=m+'/'+d;row.appendChild(lbl);
+
+      const tl=document.createElement('div');tl.className='tl';
+
+      // night shading: before wake and after nightStart
+      function addNight(startM,endM){
+        const nb=document.createElement('div');nb.className='tl-night';
+        nb.style.left=pct(startM)+'%';nb.style.width=pctW(startM,endM)+'%';
+        nb.style.opacity='0.45';tl.appendChild(nb);
+      }
+      addNight(globalStart,wakeMin);
+      addNight(nightStartMin,globalStart+WINDOW);
+
+      // cycles (behind sleeps)
+      cycles.forEach(c=>{
+        const cb=document.createElement('div');cb.className='tl-cycle';
+        cb.style.left=pct(c.feedMin)+'%';
+        cb.style.width=pctW(c.feedMin,c.sleepEndMin)+'%';
+        tl.appendChild(cb);
+        // duration label
+        const dur=document.createElement('div');dur.className='tl-dur';
+        const midPct=pct(c.feedMin)+pctW(c.feedMin,c.sleepEndMin)/2;
+        dur.style.left=midPct+'%';
+        const h=Math.floor(c.totalMin/60),mn=c.totalMin%60;
+        dur.textContent=h>0?h+'h'+mn+'m':mn+'m';
+        tl.appendChild(dur);
+      });
+
+      // sleeps
+      sleeps.forEach(s=>{
+        const sMin=toMin(s.sleepStart),eMin=toMin(s.sleepEnd);
+        const inCycle=cycles.some(c=>c.sleepStartMin===sMin);
+        const bar=document.createElement('div');bar.className='tl-bar';
+        bar.style.left=pct(sMin)+'%';bar.style.width=pctW(sMin,eMin)+'%';
+        bar.style.background=inCycle?'#1D9E75':'#5DCAA5';
+        bar.style.opacity=inCycle?'1':'0.65';
+        tl.appendChild(bar);
+      });
+
+      // feeds
+      feeds.forEach(f=>{
+        const fMin=toMin(f.time);
+        const dot=document.createElement('div');dot.className='tl-feed';
+        dot.style.left=pct(fMin)+'%';tl.appendChild(dot);
+      });
+
+      row.appendChild(tl);chartWrap.appendChild(row);
+    });
+    container.appendChild(chartWrap);
+
+    // summary info cards
+    const totalCycles=dayData.reduce((s,d)=>s+d.analysis.cycles.length,0);
+    const avgCycles=dayData.length?Math.round(totalCycles/dayData.length*10)/10:0;
+    const allGaps=dayData.flatMap(d=>d.analysis.cycles.map(c=>c.gapMin));
+    const avgGap=allGaps.length?Math.round(allGaps.reduce((a,b)=>a+b,0)/allGaps.length):0;
+    const wakeHours=dayData.map(d=>{const h=Math.floor(d.analysis.wakeMin/60),m=d.analysis.wakeMin%60;return h+':'+String(m).padStart(2,'0')});
+    const nightHours=dayData.map(d=>{const h=Math.floor(d.analysis.nightStartMin/60),m=d.analysis.nightStartMin%60;return h+':'+String(m).padStart(2,'0')});
+
+    const infoCards=document.createElement('div');infoCards.className='info-cards';
+    function mkCard(lbl,val,sub){
+      const c=document.createElement('div');c.className='info-card';
+      const l=document.createElement('div');l.className='info-card-lbl';l.textContent=lbl;c.appendChild(l);
+      const v=document.createElement('div');v.className='info-card-val';v.textContent=val;c.appendChild(v);
+      if(sub){const s=document.createElement('div');s.className='info-card-sub';s.textContent=sub;c.appendChild(s)}
+      return c;
+    }
+    infoCards.appendChild(mkCard('平均每日有效循環',avgCycles+' 次','吃—護—睡'));
+    infoCards.appendChild(mkCard('平均清醒時間',avgGap?avgGap+' 分鐘':'—','餵食到入睡'));
+    infoCards.appendChild(mkCard('起床時間區間',wakeHours[0]+(wakeHours.length>1?' ~ '+wakeHours[wakeHours.length-1]:''),'最近'+dayData.length+'天'));
+    infoCards.appendChild(mkCard('夜間開始區間',nightHours[0]+(nightHours.length>1?' ~ '+nightHours[nightHours.length-1]:''),'最近'+dayData.length+'天'));
+    container.appendChild(infoCards);
+  }
 
   refreshDate();
 })();
 </script>
 </body>
 </html>
-
