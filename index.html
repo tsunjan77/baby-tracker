@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>寶寶每日記錄 · Sunny Parent</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,'Noto Sans TC',sans-serif;background:#faf7f2;color:#2d2d2d;font-size:15px;min-height:100vh}
+  .app{max-width:520px;margin:0 auto;padding:0 0 48px}
+  .hdr{background:#fff9f4;border-bottom:1.5px solid #e8e2d9;padding:14px 16px 10px;position:sticky;top:0;z-index:50}
+  .hdr-title{font-size:15px;font-weight:600;color:#2d2d2d}
+  .hdr-title span{color:#6b9e6b}
+  .date-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .darr{width:28px;height:28px;border-radius:50%;border:1.5px solid #e8e2d9;background:transparent;cursor:pointer;font-size:15px;color:#6b6b6b;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+  .darr:hover{border-color:#6b9e6b;color:#6b9e6b;background:#edf4ed}
+  .ddisp{flex:1;text-align:center;font-size:13px;font-weight:500;color:#2d2d2d}
+  .today-btn{font-size:12px;padding:3px 10px;border:1.5px solid #6b9e6b;border-radius:20px;background:transparent;color:#6b9e6b;cursor:pointer}
+  .today-btn:hover{background:#edf4ed}
+  .body{padding:12px 16px}
+  .add-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+  .add-btn{padding:10px 4px;border-radius:12px;border:1.5px solid #e8e2d9;background:#f5f2ed;cursor:pointer;font-size:12px;font-weight:500;color:#6b6b6b;display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .15s,color .15s;font-family:inherit}
+  .add-btn:hover{border-color:#6b9e6b;color:#6b9e6b}
+  .add-btn .ico{font-size:20px}
+  .sec-lbl{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#b0aba4;margin:16px 0 8px;display:flex;align-items:center;gap:8px}
+  .sec-lbl::after{content:'';flex:1;height:1px;background:#e8e2d9}
+  .empty{text-align:center;padding:28px 16px;font-size:13px;color:#b0aba4}
+  .card{background:#fff;border:1.5px solid #e8e2d9;border-radius:12px;padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+  .card-dot{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:#f5f2ed}
+  .card-body{flex:1;min-width:0}
+  .card-main{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .card-time{font-size:12px;color:#b0aba4;flex-shrink:0}
+  .card-title{font-size:13px;font-weight:500;color:#2d2d2d}
+  .overnight-tag{font-size:10px;padding:1px 6px;border-radius:10px;background:#ede8f5;color:#5a3e7a;font-weight:500;flex-shrink:0}
+  .card-sub{font-size:12px;color:#6b6b6b;margin-top:2px}
+  .card-note{font-size:11px;color:#b0aba4;margin-top:2px;font-style:italic}
+  .card-actions{display:flex;gap:4px;flex-shrink:0}
+  .act-btn{width:26px;height:26px;border:none;background:transparent;cursor:pointer;border-radius:6px;font-size:13px;color:#b0aba4;display:flex;align-items:center;justify-content:center}
+  .act-btn:hover{background:#f5f2ed}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+  .stat{background:#f5f2ed;border-radius:10px;padding:12px}
+  .stat-val{font-size:22px;font-weight:500;color:#2d2d2d}
+  .stat-lbl{font-size:11px;color:#6b6b6b;margin-top:2px;letter-spacing:.04em}
+  .exp-btn{margin-top:16px;width:100%;padding:11px;border-radius:10px;border:1.5px solid #e8e2d9;background:#f5f2ed;cursor:pointer;font-size:13px;color:#6b6b6b;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
+  .exp-btn:hover{border-color:#6b9e6b;color:#6b9e6b}
+  .exp-box{display:none;margin-top:10px;background:#f5f2ed;border:1.5px solid #e8e2d9;border-radius:10px;padding:12px;font-size:12px;color:#2d2d2d;font-family:'Courier New',Courier,monospace;white-space:pre-wrap;line-height:1.7;max-height:300px;overflow-y:auto;user-select:all;-webkit-user-select:all}
+  .exp-hint{font-size:11px;color:#b0aba4;text-align:center;margin-top:6px;font-style:italic;display:none}
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-end;justify-content:center}
+  .overlay.open{display:flex}
+  .modal{background:#fff9f4;border-radius:18px 18px 0 0;padding:20px 16px 28px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto}
+  .mhandle{width:32px;height:3px;background:#e8e2d9;border-radius:2px;margin:0 auto 16px}
+  .mtitle{font-size:15px;font-weight:600;color:#2d2d2d;margin-bottom:14px}
+  .edit-banner{display:none;background:#fef3e2;color:#a05a00;font-size:12px;padding:6px 12px;border-radius:8px;margin-bottom:10px;text-align:center;border:1px solid #f5d9a0}
+  .edit-banner.show{display:block}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:11px;font-weight:500;color:#6b6b6b;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+  .field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1.5px solid #e8e2d9;border-radius:8px;background:#faf7f2;font-size:14px;color:#2d2d2d;outline:none;-webkit-appearance:none;font-family:inherit}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:#6b9e6b}
+  .field textarea{resize:vertical;min-height:56px}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tog-grp{display:flex;flex-wrap:wrap;gap:6px}
+  .tog{padding:6px 12px;border-radius:20px;border:1.5px solid #e8e2d9;background:#faf7f2;font-size:13px;cursor:pointer;color:#6b6b6b;transition:all .14s;font-family:inherit}
+  .tog.on{border-color:#6b9e6b;color:#3a6a3a;font-weight:500;background:#edf4ed}
+  .unit-row{display:flex;border:1.5px solid #e8e2d9;border-radius:8px;overflow:hidden;margin-bottom:6px}
+  .ubtn{flex:1;padding:7px;background:#faf7f2;border:none;cursor:pointer;font-size:13px;color:#6b6b6b;font-family:inherit}
+  .ubtn.on{background:#edf4ed;color:#3a6a3a;font-weight:500}
+  .macts{display:flex;gap:8px;margin-top:16px}
+  .mcx{flex:1;padding:12px;border-radius:10px;border:1.5px solid #e8e2d9;background:transparent;cursor:pointer;font-size:14px;color:#6b6b6b;font-family:inherit}
+  .mcx:hover{background:#e8e2d9}
+  .msv{flex:2;padding:12px;border-radius:10px;border:none;background:#6b9e6b;color:#fff;cursor:pointer;font-size:14px;font-weight:500;font-family:inherit}
+  .msv:hover{background:#5a8a5a}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-title"><span>Sunny</span> Parent · 寶寶每日記錄</div>
+    <div class="date-row">
+      <button class="darr" id="prev">‹</button>
+      <div class="ddisp" id="ddisp"></div>
+      <button class="darr" id="nxt">›</button>
+      <button class="today-btn" id="todayBtn">今天</button>
+    </div>
+  </div>
+  <div class="body">
+    <div class="add-row">
+      <button class="add-btn" id="btnFeed"><span class="ico">🍼</span>餵食</button>
+      <button class="add-btn" id="btnSleep"><span class="ico">🌙</span>睡眠</button>
+      <button class="add-btn" id="btnDiaper"><span class="ico">💧</span>尿布</button>
+    </div>
+    <div class="sec-lbl">今日記錄</div>
+    <div id="timeline"></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="sFeed">0</div><div class="stat-lbl">🍼 餵食次數</div></div>
+      <div class="stat"><div class="stat-val" id="sSleep">0h</div><div class="stat-lbl">🌙 總睡眠時數</div></div>
+      <div class="stat"><div class="stat-val" id="sWet">0</div><div class="stat-lbl">💧 排尿次數</div></div>
+      <div class="stat"><div class="stat-val" id="sPoop">0</div><div class="stat-lbl">💩 排便次數</div></div>
+    </div>
+    <button class="exp-btn" id="expBtn">📋 顯示文字摘要（全選後可複製）</button>
+    <div class="exp-box" id="expBox"></div>
+    <div class="exp-hint" id="expHint">長按或 Ctrl+A 全選後複製，貼給老師或存在筆記</div>
+  </div>
+</div>
+
+<!-- FEED MODAL -->
+<div class="overlay" id="mFeed">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">🍼 餵食記錄</div>
+    <div class="edit-banner" id="fedBanner">✏️ 編輯模式</div>
+    <div class="field"><label>時間</label><input type="time" id="fTime"></div>
+    <div class="field"><label>餵食方式</label>
+      <div class="tog-grp" id="fTypeGrp">
+        <div class="tog" data-v="母乳">母乳</div>
+        <div class="tog" data-v="瓶餵母乳">瓶餵母乳</div>
+        <div class="tog" data-v="配方奶">配方奶</div>
+      </div>
+    </div>
+    <div class="field" id="fDurFld"><label>哺乳時長（分鐘）</label><input type="number" id="fDur" placeholder="例：15" min="0"></div>
+    <div class="field" id="fAmtFld" style="display:none"><label>份量</label>
+      <div class="unit-row"><button class="ubtn on" id="uOz">oz</button><button class="ubtn" id="uMl">ml</button></div>
+      <input type="number" id="fAmt" placeholder="例：90" min="0">
+    </div>
+    <div class="field"><label>備註（選填）</label><textarea id="fNote" placeholder="例：右邊含乳不好…"></textarea></div>
+    <div class="macts"><button class="mcx" id="fCx">取消</button><button class="msv" id="fSv">儲存</button></div>
+  </div>
+</div>
+
+<!-- SLEEP MODAL -->
+<div class="overlay" id="mSleep">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">🌙 睡眠記錄</div>
+    <div class="edit-banner" id="slpBanner">✏️ 編輯模式</div>
+    <div class="frow">
+      <div class="field"><label>開始時間</label><input type="time" id="slpS"></div>
+      <div class="field"><label>結束時間</label><input type="time" id="slpE"></div>
+    </div>
+    <div class="field"><label>入睡方式</label>
+      <div class="tog-grp" id="slpTypeGrp">
+        <div class="tog" data-v="抱睡">抱睡</div>
+        <div class="tog" data-v="奶睡">奶睡</div>
+        <div class="tog" data-v="自行入睡">自行入睡</div>
+        <div class="tog" data-v="推車">推車</div>
+      </div>
+    </div>
+    <div class="field"><label>自訂入睡方式</label><input type="text" id="slpCustom" placeholder="例：搖椅、揹巾…"></div>
+    <div class="field"><label>備註（選填）</label><textarea id="slpNote" placeholder="例：中途醒一次…"></textarea></div>
+    <div class="macts"><button class="mcx" id="slpCx">取消</button><button class="msv" id="slpSv">儲存</button></div>
+  </div>
+</div>
+
+<!-- DIAPER MODAL -->
+<div class="overlay" id="mDiaper">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">💧 尿布記錄</div>
+    <div class="edit-banner" id="dpBanner">✏️ 編輯模式</div>
+    <div class="field"><label>時間</label><input type="time" id="dpTime"></div>
+    <div class="field"><label>類型</label>
+      <div class="tog-grp" id="dpTypeGrp">
+        <div class="tog" data-v="排尿">💧 排尿</div>
+        <div class="tog" data-v="排便">💩 排便</div>
+        <div class="tog" data-v="兩者">兩者</div>
+      </div>
+    </div>
+    <div class="field"><label>備註（選填）</label><textarea id="dpNote" placeholder="例：顏色異常…"></textarea></div>
+    <div class="macts"><button class="mcx" id="dpCx">取消</button><button class="msv" id="dpSv">儲存</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const db={};
+  let curDate=today(),editId=null,fUnit='oz',fType=null,slpType=null,dpType=null;
+
+  function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+  function pad(n){return String(n).padStart(2,'0')}
+  function nowTime(){const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+  function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+  function dayRecs(){return(db[curDate]||[]).slice().sort((a,b)=>a.time.localeCompare(b.time))}
+
+  function fmtDate(s){
+    const[y,m,d]=s.split('-'),dows=['日','一','二','三','四','五','六'],dt=new Date(+y,+m-1,+d);
+    return y+' / '+m+' / '+d+'  週'+dows[dt.getDay()]+(s===today()?'（今天）':'');
+  }
+  function refreshDate(){document.getElementById('ddisp').textContent=fmtDate(curDate);render();hideExport()}
+  function shiftDate(n){const d=new Date(curDate);d.setDate(d.getDate()+n);curDate=d.toISOString().slice(0,10);refreshDate()}
+
+  document.getElementById('prev').addEventListener('click',()=>shiftDate(-1));
+  document.getElementById('nxt').addEventListener('click',()=>shiftDate(1));
+  document.getElementById('todayBtn').addEventListener('click',()=>{curDate=today();refreshDate()});
+
+  function openM(id){document.getElementById(id).classList.add('open')}
+  function closeM(id){document.getElementById(id).classList.remove('open')}
+  ['mFeed','mSleep','mDiaper'].forEach(id=>{
+    document.getElementById(id).addEventListener('click',function(e){if(e.target===this)closeM(id)});
+  });
+
+  function bindTog(grpId,cb){
+    document.getElementById(grpId).querySelectorAll('.tog').forEach(el=>{
+      el.addEventListener('click',()=>{
+        document.getElementById(grpId).querySelectorAll('.tog').forEach(x=>x.classList.remove('on'));
+        el.classList.add('on');cb(el.dataset.v);
+      });
+    });
+  }
+  function setTog(grpId,val){document.getElementById(grpId).querySelectorAll('.tog').forEach(el=>el.classList.toggle('on',el.dataset.v===val))}
+  function clearTog(grpId){document.getElementById(grpId).querySelectorAll('.tog').forEach(el=>el.classList.remove('on'))}
+
+  // FEED
+  function resetFeed(){
+    document.getElementById('fTime').value=nowTime();clearTog('fTypeGrp');fType=null;
+    document.getElementById('fDur').value='';document.getElementById('fAmt').value='';document.getElementById('fNote').value='';
+    document.getElementById('fDurFld').style.display='';document.getElementById('fAmtFld').style.display='none';
+    document.getElementById('fedBanner').classList.remove('show');
+    fUnit='oz';document.getElementById('uOz').classList.add('on');document.getElementById('uMl').classList.remove('on');
+  }
+  bindTog('fTypeGrp',v=>{
+    fType=v;const b=v==='母乳';
+    document.getElementById('fDurFld').style.display=b?'':'none';
+    document.getElementById('fAmtFld').style.display=b?'none':'';
+  });
+  document.getElementById('uOz').addEventListener('click',()=>{fUnit='oz';document.getElementById('uOz').classList.add('on');document.getElementById('uMl').classList.remove('on')});
+  document.getElementById('uMl').addEventListener('click',()=>{fUnit='ml';document.getElementById('uMl').classList.add('on');document.getElementById('uOz').classList.remove('on')});
+  document.getElementById('btnFeed').addEventListener('click',()=>{resetFeed();editId=null;openM('mFeed')});
+  document.getElementById('fCx').addEventListener('click',()=>closeM('mFeed'));
+  document.getElementById('fSv').addEventListener('click',()=>{
+    const time=document.getElementById('fTime').value;
+    if(!time){alert('請填入時間');return}if(!fType){alert('請選擇餵食方式');return}
+    saveRec({id:editId||uid(),type:'feed',time,feedType:fType,
+      duration:fType==='母乳'?document.getElementById('fDur').value:'',
+      amount:fType!=='母乳'?document.getElementById('fAmt').value:'',
+      unit:fType!=='母乳'?fUnit:'',note:document.getElementById('fNote').value.trim()});
+    closeM('mFeed');
+  });
+
+  // SLEEP
+  function resetSleep(){
+    document.getElementById('slpS').value=nowTime();document.getElementById('slpE').value='';
+    clearTog('slpTypeGrp');slpType=null;document.getElementById('slpCustom').value='';
+    document.getElementById('slpNote').value='';document.getElementById('slpBanner').classList.remove('show');
+  }
+  bindTog('slpTypeGrp',v=>slpType=v);
+  document.getElementById('btnSleep').addEventListener('click',()=>{resetSleep();editId=null;openM('mSleep')});
+  document.getElementById('slpCx').addEventListener('click',()=>closeM('mSleep'));
+  document.getElementById('slpSv').addEventListener('click',()=>{
+    const s=document.getElementById('slpS').value;if(!s){alert('請填入開始時間');return}
+    const e=document.getElementById('slpE').value,custom=document.getElementById('slpCustom').value.trim();
+    const sType=custom||slpType||'';let overnight=false,durMin=0;
+    if(e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number);const sM=sh*60+sm,eM=eh*60+em;overnight=eM<sM;durMin=overnight?(1440-sM+eM):(eM-sM)}
+    saveRec({id:editId||uid(),type:'sleep',time:s,sleepStart:s,sleepEnd:e,sleepType:sType,overnight,durMin,note:document.getElementById('slpNote').value.trim()});
+    closeM('mSleep');
+  });
+
+  // DIAPER
+  function resetDiaper(){
+    document.getElementById('dpTime').value=nowTime();clearTog('dpTypeGrp');dpType=null;
+    document.getElementById('dpNote').value='';document.getElementById('dpBanner').classList.remove('show');
+  }
+  bindTog('dpTypeGrp',v=>dpType=v);
+  document.getElementById('btnDiaper').addEventListener('click',()=>{resetDiaper();editId=null;openM('mDiaper')});
+  document.getElementById('dpCx').addEventListener('click',()=>closeM('mDiaper'));
+  document.getElementById('dpSv').addEventListener('click',()=>{
+    const time=document.getElementById('dpTime').value;if(!time){alert('請填入時間');return}if(!dpType){alert('請選擇類型');return}
+    saveRec({id:editId||uid(),type:'diaper',time,diaperType:dpType,note:document.getElementById('dpNote').value.trim()});
+    closeM('mDiaper');
+  });
+
+  function saveRec(rec){
+    if(!db[curDate])db[curDate]=[];
+    const idx=db[curDate].findIndex(r=>r.id===rec.id);
+    if(idx>=0)db[curDate][idx]=rec;else db[curDate].push(rec);
+    render();hideExport();
+  }
+  function delRec(id){
+    if(!db[curDate])return;db[curDate]=db[curDate].filter(r=>r.id!==id);render();hideExport();
+  }
+  function editRec(id){
+    const rec=(db[curDate]||[]).find(r=>r.id===id);if(!rec)return;editId=id;
+    if(rec.type==='feed'){
+      resetFeed();document.getElementById('fTime').value=rec.time;fType=rec.feedType;setTog('fTypeGrp',rec.feedType);
+      const b=rec.feedType==='母乳';document.getElementById('fDurFld').style.display=b?'':'none';document.getElementById('fAmtFld').style.display=b?'none':'';
+      document.getElementById('fDur').value=rec.duration||'';document.getElementById('fAmt').value=rec.amount||'';
+      if(rec.unit==='ml'){fUnit='ml';document.getElementById('uMl').classList.add('on');document.getElementById('uOz').classList.remove('on')}
+      document.getElementById('fNote').value=rec.note||'';document.getElementById('fedBanner').classList.add('show');openM('mFeed');
+    } else if(rec.type==='sleep'){
+      resetSleep();document.getElementById('slpS').value=rec.sleepStart;document.getElementById('slpE').value=rec.sleepEnd||'';
+      const presets=['抱睡','奶睡','自行入睡','推車'];
+      if(presets.includes(rec.sleepType)){slpType=rec.sleepType;setTog('slpTypeGrp',rec.sleepType)}
+      else document.getElementById('slpCustom').value=rec.sleepType||'';
+      document.getElementById('slpNote').value=rec.note||'';document.getElementById('slpBanner').classList.add('show');openM('mSleep');
+    } else {
+      resetDiaper();document.getElementById('dpTime').value=rec.time;dpType=rec.diaperType;setTog('dpTypeGrp',rec.diaperType);
+      document.getElementById('dpNote').value=rec.note||'';document.getElementById('dpBanner').classList.add('show');openM('mDiaper');
+    }
+  }
+
+  function render(){
+    const tl=document.getElementById('timeline');
+    while(tl.firstChild)tl.removeChild(tl.firstChild);
+    const recs=dayRecs();
+    if(!recs.length){const e=document.createElement('div');e.className='empty';e.textContent='今天還沒有記錄';tl.appendChild(e)}
+    else recs.forEach(rec=>{
+      const card=document.createElement('div');card.className='card';
+      const dot=document.createElement('div');dot.className='card-dot';dot.textContent=rec.type==='feed'?'🍼':rec.type==='sleep'?'🌙':'💧';card.appendChild(dot);
+      const body=document.createElement('div');body.className='card-body';
+      const main=document.createElement('div');main.className='card-main';
+      const t=document.createElement('span');t.className='card-time';t.textContent=rec.time;main.appendChild(t);
+      const ti=document.createElement('span');ti.className='card-title';
+      let sub='';
+      if(rec.type==='feed'){ti.textContent=rec.feedType;if(rec.feedType==='母乳'&&rec.duration)sub=rec.duration+' 分鐘';else if(rec.amount)sub=rec.amount+' '+rec.unit}
+      else if(rec.type==='sleep'){ti.textContent=rec.sleepType||'睡眠';if(rec.sleepEnd){const h=Math.floor(rec.durMin/60),m=rec.durMin%60;sub=rec.sleepStart+' → '+rec.sleepEnd+'（'+(h>0?h+'h ':'')+m+'m）'}}
+      else{ti.textContent=rec.diaperType}
+      main.appendChild(ti);
+      if(rec.type==='sleep'&&rec.overnight){const tag=document.createElement('span');tag.className='overnight-tag';tag.textContent='跨日 +1';main.appendChild(tag)}
+      body.appendChild(main);
+      if(sub){const s=document.createElement('div');s.className='card-sub';s.textContent=sub;body.appendChild(s)}
+      if(rec.note){const n=document.createElement('div');n.className='card-note';n.textContent=rec.note;body.appendChild(n)}
+      card.appendChild(body);
+      const acts=document.createElement('div');acts.className='card-actions';
+      const eb=document.createElement('button');eb.className='act-btn';eb.textContent='✏️';eb.addEventListener('click',()=>editRec(rec.id));acts.appendChild(eb);
+      const db2=document.createElement('button');db2.className='act-btn';db2.textContent='🗑';db2.addEventListener('click',()=>{if(confirm('確定刪除？'))delRec(rec.id)});acts.appendChild(db2);
+      card.appendChild(acts);tl.appendChild(card);
+    });
+    renderStats();
+  }
+
+  function renderStats(){
+    const recs=db[curDate]||[];
+    const fc=recs.filter(r=>r.type==='feed').length;
+    let sm=0;recs.filter(r=>r.type==='sleep').forEach(r=>sm+=r.durMin||0);
+    const h=Math.floor(sm/60),m=sm%60;
+    document.getElementById('sFeed').textContent=fc;
+    document.getElementById('sSleep').textContent=sm===0?'0h':(h>0?h+'h'+(m>0?' '+m+'m':''):(m+'m'));
+    document.getElementById('sWet').textContent=recs.filter(r=>r.type==='diaper'&&(r.diaperType==='排尿'||r.diaperType==='兩者')).length;
+    document.getElementById('sPoop').textContent=recs.filter(r=>r.type==='diaper'&&(r.diaperType==='排便'||r.diaperType==='兩者')).length;
+  }
+
+  function hideExport(){document.getElementById('expBox').style.display='none';document.getElementById('expHint').style.display='none'}
+
+  document.getElementById('expBtn').addEventListener('click',function(){
+    const box=document.getElementById('expBox'),hint=document.getElementById('expHint');
+    if(box.style.display==='block'){hideExport();return}
+    const recs=dayRecs(),[y,m,d]=curDate.split('-');
+    const lines=['📋 Sunny Parent 寶寶記錄 ─ '+y+'/'+m+'/'+d,'─'.repeat(30)];
+    if(!recs.length){lines.push('（今日無記錄）')}
+    else recs.forEach(r=>{
+      if(r.type==='feed'){let l='🍼 '+r.time+'  餵食 / '+r.feedType;if(r.feedType==='母乳'&&r.duration)l+='  '+r.duration+'分鐘';else if(r.amount)l+='  '+r.amount+r.unit;if(r.note)l+='  備註：'+r.note;lines.push(l)}
+      else if(r.type==='sleep'){const h=Math.floor((r.durMin||0)/60),mn=(r.durMin||0)%60;let l='🌙 '+r.sleepStart+(r.sleepEnd?' → '+r.sleepEnd+'（'+(h>0?h+'h ':'')+mn+'m）':'');if(r.overnight)l+='【跨日】';if(r.sleepType)l+='  '+r.sleepType;if(r.note)l+='  備註：'+r.note;lines.push(l)}
+      else{let l='💧 '+r.time+'  尿布 / '+r.diaperType;if(r.note)l+='  備註：'+r.note;lines.push(l)}
+    });
+    lines.push('─'.repeat(30));
+    const rs=db[curDate]||[],fc=rs.filter(r=>r.type==='feed').length;
+    let sm=0;rs.filter(r=>r.type==='sleep').forEach(r=>sm+=r.durMin||0);
+    const hh=Math.floor(sm/60),mm2=sm%60;
+    lines.push('統計：餵食 '+fc+' 次 ｜ 睡眠 '+(sm===0?'0h':(hh>0?hh+'h'+(mm2>0?' '+mm2+'m':''):(mm2+'m')))+' ｜ 排尿 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排尿'||r.diaperType==='兩者')).length+' 次 ｜ 排便 '+rs.filter(r=>r.type==='diaper'&&(r.diaperType==='排便'||r.diaperType==='兩者')).length+' 次');
+    box.textContent=lines.join('\n');box.style.display='block';hint.style.display='block';
+  });
+
+  refreshDate();
+})();
+</script>
+</body>
+</html>
